@@ -1,0 +1,63 @@
+@Library('my-shared-library@demo')_
+
+pipeline {
+    agent any
+    
+    environment {
+      githubCredentialsId = "github-access-mgworkshop"
+      gitUrl = "https://github.com/devopsit-mg/scm-exercise.git"
+      gitUsername = "workshop"
+      gitUserEmail = "workshop@mgworkshop.eu"
+      gitHubPath = "devopsit-mg/scm-exercise"
+      gitPath = "."
+
+    }
+
+    options {
+        timestamps()
+    }
+    
+    parameters {
+        string(name: 'branch', defaultValue: 'main', description: 'branch to checkout')
+        string(name: 'fileName' ,description: 'Filename to commit' )
+        string(name: 'contentFile', description: 'Content of the filename')
+        string(name: 'commitMessage', description: 'Commit message')
+    }
+
+    stages {
+        stage("Checkout") {
+            steps {
+                script {
+                    scmUtils.gitCheckout(
+                        branch: params.branch,
+                        url: env.gitUrl,
+                        credentialsId: env.githubCredentialsId
+                    )
+                }  
+            }
+        }
+        stage("Create file") {
+            steps {
+                sh "echo ${params.contentFile} > ${params.fileName} "
+            }
+        }
+
+        stage("Add to repository") {
+            steps {
+                script {
+
+                    scmUtils.setGitUserInfo(env.gitUserEmail,env.gitUsername)  
+
+                    scmUtils.gitCommit (
+                      path: env.gitPath,
+                      commitMessage: params.commitMessage
+                      )
+                        
+                    scmUtils.gitPush(
+                        credentialsId: env.githubCredentialsId, 
+                        gitHubPath: env.gitHubPath)
+                    }
+                    
+                }
+            }
+        }
