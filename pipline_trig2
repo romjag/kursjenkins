@@ -14,7 +14,7 @@ pipeline {
             }
             post {
               failure {
-                build job: 'my-downstream-pipeline-to-be-triggered', parameters: [
+                build job: 'pipeline_trig1', parameters: [
                 string(name: 'ENVIRONMENT', value: params.environment)]
               }
             }
