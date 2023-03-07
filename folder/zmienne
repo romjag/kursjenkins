@@ -1,0 +1,27 @@
+def gitCheckout(Map stageParams) {
+ 
+    checkout([
+        $class: 'GitSCM',
+        branches: [[name:  stageParams.branch ]],
+        userRemoteConfigs: [[ url: stageParams.url, credentialsId: stageParams.credentialsId ]],
+        extensions: [[$class: 'LocalBranch']]
+    ])
+}
+
+
+def setGitUserInfo(String email, String username) {
+  sh "git config user.name ${username}"
+  sh "git config user.email ${email}"
+}
+
+def gitCommit(Map stageParams) {
+  sh "git add ${stageParams.path}"
+  sh "git commit -m ${stageParams.commitMessage}"
+}
+
+def gitPush(Map params) {
+    withCredentials([usernamePassword(credentialsId: params.credentialsId, usernameVariable: 'user', passwordVariable: 'passwd')])
+      {
+       sh "git push https://${user}:${passwd}@github.com/${user}/${params.gitHubPath}.git"
+      }
+}
