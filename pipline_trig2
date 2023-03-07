@@ -1,0 +1,24 @@
+
+pipeline {
+
+    agent any 
+
+    parameters {
+        choice choices: ['dev', 'stage', 'demo', 'prod'], description: '', name: 'environment'
+    }
+
+    stages {
+        stage("Test trigger post") {
+            steps {
+                sh "exit 1"
+            }
+            post {
+              failure {
+                build job: 'my-downstream-pipeline-to-be-triggered', parameters: [
+                string(name: 'ENVIRONMENT', value: params.environment)]
+              }
+            }
+        }
+    }
+
+}
