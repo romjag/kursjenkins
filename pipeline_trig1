@@ -1,0 +1,14 @@
+pipeline {
+    agent any
+    parameters {
+        string defaultValue: 'dev', name: 'ENVIRONMENT'
+    }
+    stages {
+        stage("Check variable") {
+            steps {
+                echo "${env.ENVIRONMENT}"
+            }
+            
+        }
+    }
+}
